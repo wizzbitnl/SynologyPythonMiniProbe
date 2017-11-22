@@ -1,0 +1,110 @@
+#!/bin/sh
+
+# Package
+PACKAGE="PythonMiniProbe"
+DNAME="prtgprobe"
+
+# Others
+INSTALL_DIR="/usr/local/${PACKAGE}"
+PYTHON_DIR="/usr/local/python"
+PYTHON="${INSTALL_DIR}/env/bin/python"
+PATH="${PYTHON_DIR}/bin:/usr/local/bin:/bin:/usr/bin:/usr/syno/bin"
+RUNAS="${PACKAGE}"
+PROG_PY="${INSTALL_DIR}/miniprobe/probe.py"
+LOG_FILE="${INSTALL_DIR}/miniprobe/logs/probe.log"
+PS_CMD="ps w"
+
+
+dsm_version ()
+{
+    if [ `head -n 1 /etc.defaults/VERSION` = "majorversion=\"6\"" ]
+    then
+        echo "6"
+    elif [ `head -n 1 /etc.defaults/VERSION` = "majorversion=\"5\"" ]
+    then
+        echo "5"
+    elif [ `head -n 1 /etc.defaults/VERSION` = "majorversion=\"7\"" ]
+    then
+        echo "7"
+    else
+        echo "6"
+    fi
+}
+
+start_daemon ()
+{
+    # Launch the application in the background
+    chown ${PACKAGE}:root ${LOG_FILE}
+    chown ${PACKAGE}:root ${INSTALL_DIR}/miniprobe/logs/tail.log
+
+    if [[ "$(dsm_version)" -gt "5" ]]
+    then
+        sudo -u ${RUNAS} sh -c "PATH=${PATH}; cd ${INSTALL_DIR}/miniprobe; ${PYTHON} ${PROG_PY} &"
+    else
+        su - ${RUNAS} -c "PATH=${PATH}; cd ${INSTALL_DIR}/miniprobe; ${PYTHON} ${PROG_PY} &"
+    fi
+}
+
+stop_daemon ()
+{
+    if [[ "$(dsm_version)" -gt "5" ]]
+    then
+        PS_CMD="ps wax"
+    fi
+
+    # Kill the application
+    kill `${PS_CMD} | grep ${PACKAGE} | grep -v -E 'stop|grep' | awk '{print $1}'`
+}
+
+daemon_status ()
+{
+    if [[ "$(dsm_version)" -gt "5" ]]
+    then
+        PS_CMD="ps wax"
+    fi
+    if [ `${PS_CMD} | grep ${PACKAGE} | grep -v -E 'status|grep' | wc -l` -gt 0 ] 
+    then
+        return 0
+    else
+        return 1
+    fi
+}
+
+case $1 in
+    start)
+            # start the thing
+            echo Starting ${DNAME} ...
+            echo -n `/bin/date`>>$LOG_FILE;
+            echo ": Starting ${DNAME}...">>$LOG_FILE
+            start_daemon
+            exit $?
+        ;;
+    stop)
+            echo Stopping ${DNAME} ...
+            echo -n `/bin/date`>>$LOG_FILE;
+            echo ": Stopping ${DNAME}...">>$LOG_FILE
+            stop_daemon
+            exit 0
+        ;;
+    status)
+            echo -n `/bin/date`>>$LOG_FILE;
+            echo ": Checking status of ${DNAME}...">>$LOG_FILE
+            if daemon_status
+            then
+                echo ${DNAME} is running
+                exit 0
+            else
+                echo ${DNAME} is not running
+                exit 1
+            fi
+        ;;
+    log)
+            echo "Last 500 lines from log:" > ${INSTALL_DIR}/miniprobe/logs/tail.log
+            tail -n 500 ${LOG_FILE} >> ${INSTALL_DIR}/miniprobe/logs/tail.log
+            echo ${INSTALL_DIR}/miniprobe/logs/tail.log
+            exit 0
+        ;;
+    *)
+        exit 1
+        ;;
+esac

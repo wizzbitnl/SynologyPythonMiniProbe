@@ -1,0 +1,37 @@
+[{
+    "step_title": "PRTG mini probe settings",
+    "items": [
+	    {
+	        "type": "textfield",
+			"desc": "Mini probe",
+	        "subitems": [
+	        	{
+	            	"key": "wizard_name",
+	            	"desc": "Name"
+				}
+			]
+		},
+		{
+	        "type": "textfield",
+			"desc": "PRTG server",
+	        "subitems": [
+	        	{
+	            	"key": "wizard_server",
+	            	"desc": "Hostname/IP"
+				},
+				{
+					"key": "wizard_port",
+	            	"desc": "Port [443]",	
+					"validator": { 
+						"allowBlank": false, 
+						"maxLength": 6
+					}
+				},
+				{
+					"key": "wizard_key",
+	            	"desc": "Access key"
+				}
+			]
+		}
+	]
+}]
