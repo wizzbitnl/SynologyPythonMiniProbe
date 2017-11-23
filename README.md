@@ -41,7 +41,7 @@ Creates tar files:
 ```
 The resulting installation file will be in **dist**
 
-### Installing on the Synolgy device:
+### Installing on the Synology device:
 
 1. In the Package manager, change the **Trust Level** to **Any publisher**
 2. Add Synocommunity repository - https://synocommunity.com
