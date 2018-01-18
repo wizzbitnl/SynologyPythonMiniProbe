@@ -1,0 +1,3 @@
+[submodule "PythonMiniProbe"]
+	path = PythonMiniProbe
+	url = https://github.com/PaesslerAG/PythonMiniProbe.git
