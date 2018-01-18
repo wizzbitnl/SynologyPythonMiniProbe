@@ -41,6 +41,8 @@ Creates tar files:
 ```
 The resulting installation file will be in **dist**
 
+**Note**: make.sh uses *imagemagick* to convert icons. Install imagemagick and make sure the *convert* binary is available on your system.
+
 ### Installing on the Synology device:
 
 1. In the Package manager, change the **Trust Level** to **Any publisher**
